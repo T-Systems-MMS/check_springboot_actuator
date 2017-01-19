@@ -60,8 +60,8 @@ else:
     helper.add_summary('global status is ' + status)
 
     for item in [
-        'diskSpace', 'cassandra', 'diskSpace', 'dataSource', 'elasticsearch',
-        'jms', 'mail', 'mongo', 'rabbit', 'redis', 'solr'
+        'cassandra', 'diskSpace', 'dataSource', 'elasticsearch', 'jms', 'mail',
+        'mongo', 'rabbit', 'redis', 'solr'
     ]:
         if item in json_data:
             item_status = json_data[item]['status']
