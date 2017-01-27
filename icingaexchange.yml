@@ -1,0 +1,32 @@
+name: check_springboot_actuator
+description: "file:///README.md"
+url: "https://github.com/T-Systems-MMS/check_springboot_actuator.git"
+tags: Java, Spring-Boot, Actuator
+vendor: T-Systems Multimedia Solutions GmbH
+target: Service
+type: Plugin
+license: MIT
+releases:
+  - name: 0.1.0
+    description: "initial release"
+    files:
+      - name: check_springboot_actuator.py
+        url: "file:///check_springboot_actuator.py"
+        description: "Check Command"
+        checksum: 5b26d9e10409411cbb25d0cba05df505
+      - name: LICENSE
+        url: "file:///LICENSE"
+        description: "MIT license text"
+        checksum: a46976fb864fd4df3e10dadb60c95f2d
+      - name: README.md
+        url: "file:///README.md"
+        description: "documentation"
+        checksum: 220b3c3d1d5f9f11bfd507205efff776
+      - name: changes.md
+        url: "file:///changes.md"
+        description: "change log"
+        checksum: 9e75d3f1f970d5298774b330b1dfead7
+      - name: requirements.txt
+        url: "file:///requirements.txt"
+        description: "Python dependency information"
+        checksum: 59f94445c9810321833936b6aa7f7b32
