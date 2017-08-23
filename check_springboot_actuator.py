@@ -57,7 +57,7 @@ else:
         helper.status(critical)
     else:
         helper.status(unknown)
-    helper.add_summary('global status is ' + status)
+    helper.add_summary('global status is {}'.format(status))
 
     for item in [
         'cassandra', 'diskSpace', 'dataSource', 'elasticsearch', 'jms', 'mail',
