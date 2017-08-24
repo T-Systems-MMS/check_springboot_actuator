@@ -84,9 +84,11 @@ else:
             status = key.split('.', 4)[2]
             http_status_counter[status] = (
                 http_status_counter.get(status, 0) + json_data[key])
+        else:
+            helper.add_metric(label=key.replace('.', '_'), value=json_data[key])
 
     for status in http_status_counter:
         helper.add_metric(
-            label='http' + status, value=http_status_counter[status])
+            label='http{}'.format(status), value=http_status_counter[status])
 
 helper.exit()
