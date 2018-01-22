@@ -5,14 +5,14 @@ import logging
 
 from pynag.Plugins import PluginHelper, ok, critical, unknown
 from requests import get
-from requests.exceptions import SSLError
+from requests.exceptions import ConnectionError
 
 helper = PluginHelper()
 
 helper.parser.add_option(
     '-U', '--url',
     help='Base URL of Spring Boot Application (default: %default)',
-    dest='url', default='http://localhost:8080/')
+    dest='url', default='http://localhost:8080')
 helper.parser.add_option(
     '-N', '--no-check-certificate',
     help="don't verify certificate", dest='verify',
@@ -36,19 +36,23 @@ if helper.options.truststore:
 def request_data(url, **get_args):
     logging.captureWarnings(True)
     try:
-        return get(url, **get_args).json()
-    except SSLError:
-        logging.exception('error fetching data from %s', url)
-        return None
+        return get(url, **get_args).json(), None
+    except ConnectionError as e:
+        helper.debug('error fetching data from {}'.format(url))
+        return None, e
     finally:
         logging.captureWarnings(False)
 
 
-json_data = request_data(health_endpoint, **get_args)
+json_data, err = request_data(health_endpoint, **get_args)
 
 if json_data is None:
-    helper.status(unknown)
-    helper.add_summary('no health data available')
+    if err is None:
+        helper.status(unknown)
+        helper.add_summary('no health data available')
+    else:
+        helper.status(critical)
+        helper.add_summary('could not fetch health data: {}'.format(err))
 else:
     status = json_data['status']
     if status == 'UP':
@@ -71,11 +75,13 @@ else:
             elif item_status in ('DOWN', 'OUT_OF_SERVICE'):
                 helper.status(critical)
 
-json_data = request_data(metrics_endpoint, **get_args)
+json_data, err = request_data(metrics_endpoint, **get_args)
 
 if json_data is None:
-    helper.status(unknown)
-    helper.add_summary('no metrics data available')
+    if err is None:
+        helper.add_summary('no metrics data available')
+    else:
+        helper.add_summary('error fetching metrics data: {}'.format(err))
 else:
     http_status_counter = {}
 
