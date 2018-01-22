@@ -30,3 +30,26 @@ releases:
         url: "file:///requirements.txt"
         description: "Python dependency information"
         checksum: 59f94445c9810321833936b6aa7f7b32
+  - name: 0.1.1
+    description: "connection error bugfix"
+    files:
+      - name: check_springboot_actuator.py
+        url: "file:///check_springboot_actuator.py"
+        description: "Check Command"
+        checksum: 9f47c59c4d543c8e1da1d49935db480a
+      - name: LICENSE
+        url: "file:///LICENSE"
+        description: "MIT license text"
+        checksum: a46976fb864fd4df3e10dadb60c95f2d
+      - name: README.md
+        url: "file:///README.md"
+        description: "documentation"
+        checksum: 220b3c3d1d5f9f11bfd507205efff776
+      - name: changes.md
+        url: "file:///changes.md"
+        description: "change log"
+        checksum: 3481efc9898b9c55d0c9d51ca5dd5eb4
+      - name: requirements.txt
+        url: "file:///requirements.txt"
+        description: "Python dependency information"
+        checksum: 59f94445c9810321833936b6aa7f7b32
