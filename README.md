@@ -14,6 +14,7 @@ The check checks the status field from the health endpoint for
 - global status
 - cassandra status
 - diskSpace status
+- db
 - dataSource status
 - elasticsearch status
 - jms status
@@ -22,6 +23,7 @@ The check checks the status field from the health endpoint for
 - rabbit status
 - redis status
 - solr status
+- vault
 
 The check aggregates metrics for the counter.status data from the metrics
 endpoints.

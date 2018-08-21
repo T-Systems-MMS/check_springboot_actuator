@@ -21,11 +21,18 @@ helper.parser.add_option(
     '-t', '--trust-store',
     help='trust store (PEM format) to use for TLS certificate validation',
     dest='truststore')
+helper.parser.add_option(
+    '-m', '--metrics',
+    help='comma separated list of metrics to display',
+    dest='metrics')
 
 helper.parse_arguments()
 
 health_endpoint = helper.options.url + '/health/'
 metrics_endpoint = helper.options.url + '/metrics/'
+
+contenttype_v1 = 'application/vnd.spring-boot.actuator.v1'
+contenttype_v2 = 'application/vnd.spring-boot.actuator.v2'
 
 get_args = {'verify': helper.options.verify}
 
@@ -34,18 +41,81 @@ if helper.options.truststore:
 
 
 def request_data(url, **get_args):
+    """executes get request to retrieve data from given url"""
     logging.captureWarnings(True)
     try:
-        return get(url, **get_args).json(), None
+        response = get(url, **get_args)
+        # check response content type to determine which actuator api to be used
+        if response.ok:
+            contenttype = response.headers['Content-Type']
+            version = 1 if contenttype.startswith(contenttype_v1) else 2
+            return response.json(), version, None
+        else:
+            return None, None, Exception(response.status_code, url)
     except ConnectionError as e:
         helper.debug('error fetching data from {}'.format(url))
-        return None, e
+        return None, None, e
     finally:
         logging.captureWarnings(False)
 
 
-json_data, err = request_data(health_endpoint, **get_args)
+def handle_version_1():
+    """handles metrics from spring boot 1.x application"""
+    json_data, _, err = request_data(metrics_endpoint, **get_args)
 
+    if json_data is None:
+        if err is None:
+            helper.add_summary('no metrics data available')
+        else:
+            helper.add_summary('error fetching metrics data: {}'.format(err))
+    else:
+        http_status_counter = {}
+
+        for key in json_data:
+            if key.startswith('counter.status'):
+                status = key.split('.', 4)[2]
+                http_status_counter[status] = (
+                    http_status_counter.get(status, 0) + json_data[key])
+            else:
+                helper.add_metric(label=key.replace('.', '_'), value=json_data[key])
+
+        for status in http_status_counter:
+            helper.add_metric(
+                label='http{}'.format(status), value=http_status_counter[status])
+
+
+def handle_version_2():
+    """handles metrics from spring boot 2.x application"""
+    metrics = []
+    if helper.options.metrics:
+        metrics = helper.options.metrics.split(',')
+
+    http_status_counter = {}
+    for key in metrics:
+        key = key.strip()
+        json_data, _, err = request_data(metrics_endpoint + key, **get_args)
+
+        if err:
+            helper.add_summary('error fetching metrics data: {}'.format(err))
+            break
+
+        measurements = json_data['measurements']
+        for measurement in measurements:
+            if measurement['statistic'] == "VALUE":
+                if key.startswith('counter.status'):
+                    status = key.split('.', 4)[2]
+                    http_status_counter[status] = (
+                            http_status_counter.get(status, 0) + measurement['value'])
+                else:
+                    helper.add_metric(label=key.replace('.', '_'), value=measurement['value'])
+                break
+
+    for status in http_status_counter:
+        helper.add_metric(
+            label='http{}'.format(status), value=http_status_counter[status])
+
+
+json_data, version, err = request_data(health_endpoint, **get_args)
 if json_data is None:
     if err is None:
         helper.status(unknown)
@@ -63,38 +133,26 @@ else:
         helper.status(unknown)
     helper.add_summary('global status is {}'.format(status))
 
+    if version == 1:
+        details = json_data
+    if version == 2:
+        details = json_data['details']
+
     for item in [
         'cassandra', 'diskSpace', 'dataSource', 'elasticsearch', 'jms', 'mail',
-        'mongo', 'rabbit', 'redis', 'solr'
+        'mongo', 'rabbit', 'redis', 'solr', 'db', 'vault'
     ]:
-        if item in json_data:
-            item_status = json_data[item]['status']
+        if item in details:
+            item_status = details[item]['status']
             helper.add_summary('{} status is {}'.format(item, item_status))
             if helper.get_status() != critical and item_status == 'UNKNOWN':
                 helper.status(unknown)
             elif item_status in ('DOWN', 'OUT_OF_SERVICE'):
                 helper.status(critical)
 
-json_data, err = request_data(metrics_endpoint, **get_args)
-
-if json_data is None:
-    if err is None:
-        helper.add_summary('no metrics data available')
-    else:
-        helper.add_summary('error fetching metrics data: {}'.format(err))
-else:
-    http_status_counter = {}
-
-    for key in json_data:
-        if key.startswith('counter.status'):
-            status = key.split('.', 4)[2]
-            http_status_counter[status] = (
-                http_status_counter.get(status, 0) + json_data[key])
-        else:
-            helper.add_metric(label=key.replace('.', '_'), value=json_data[key])
-
-    for status in http_status_counter:
-        helper.add_metric(
-            label='http{}'.format(status), value=http_status_counter[status])
+    if version == 1:
+        handle_version_1()
+    if version == 2:
+        handle_version_2()
 
 helper.exit()
