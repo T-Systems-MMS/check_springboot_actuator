@@ -25,6 +25,10 @@ helper.parser.add_option(
     '-m', '--metrics',
     help='comma separated list of metrics to display',
     dest='metrics')
+helper.parser.add_option(
+    '-u', '--user-credentials',
+    help='user credentials in the format username:password',
+    dest='credentials')
 
 helper.parse_arguments()
 
@@ -38,6 +42,9 @@ get_args = {'verify': helper.options.verify}
 
 if helper.options.truststore:
     get_args['verify'] = helper.options.truststore
+
+if helper.options.credentials:
+    get_args['auth'] = tuple(helper.options.credentials.split(':'))
 
 
 def request_data(url, **get_args):
