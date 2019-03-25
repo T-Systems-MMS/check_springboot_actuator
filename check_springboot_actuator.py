@@ -108,14 +108,13 @@ def handle_version_2():
 
         measurements = json_data['measurements']
         for measurement in measurements:
-            if measurement['statistic'] == "VALUE":
-                if key.startswith('counter.status'):
-                    status = key.split('.', 4)[2]
-                    http_status_counter[status] = (
-                            http_status_counter.get(status, 0) + measurement['value'])
-                else:
-                    helper.add_metric(label=key.replace('.', '_'), value=measurement['value'])
-                break
+            if key.startswith('counter.status'):
+                status = key.split('.', 4)[2]
+                http_status_counter[status] = (
+                        http_status_counter.get(status, 0) + measurement['value'])
+            else:
+                helper.add_metric(label="%s_%s" % (key.replace('.', '_'), measurement['statistic'].lower()), value=measurement['value'])
+
 
     for status in http_status_counter:
         helper.add_metric(
