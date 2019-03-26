@@ -53,3 +53,26 @@ releases:
         url: "file:///requirements.txt"
         description: "Python dependency information"
         checksum: 59f94445c9810321833936b6aa7f7b32
+  - name: 0.2.0
+    description: "Spring Boot 2 support"
+    files:
+      - name: check_springboot_actuator.py
+        url: "file:///check_springboot_actuator.py"
+        description: "Check Command"
+        checksum: 0ad66456df5fb62e425c7726b5b42cff
+      - name: LICENSE
+        url: "file:///LICENSE"
+        description: "MIT license text"
+        checksum: a46976fb864fd4df3e10dadb60c95f2d
+      - name: README.md
+        url: "file:///README.md"
+        description: "documentation"
+        checksum: be93d438c42eb1e7b7221b987a2b736c
+      - name: changes.md
+        url: "file:///changes.md"
+        description: "change log"
+        checksum: 82efcdaaee4a0ea937a4b14ef339d48f
+      - name: requirements.txt
+        url: "file:///requirements.txt"
+        description: "Python dependency information"
+        checksum: eb2317583694d13d9670294826acfea1
