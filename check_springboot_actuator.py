@@ -142,7 +142,7 @@ else:
     if version == 1:
         details = json_data
     if version == 2:
-        details = json_data['details']
+        details = json_data['status']
 
     for item in [
         'cassandra', 'diskSpace', 'dataSource', 'elasticsearch', 'jms', 'mail',
