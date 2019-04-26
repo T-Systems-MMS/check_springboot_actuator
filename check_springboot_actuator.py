@@ -32,8 +32,8 @@ helper.parser.add_option(
 
 helper.parse_arguments()
 
-health_endpoint = helper.options.url + '/health/'
-metrics_endpoint = helper.options.url + '/metrics/'
+health_endpoint = helper.options.url + '/health'
+metrics_endpoint = helper.options.url + '/metrics'
 
 contenttype_v1 = 'application/vnd.spring-boot.actuator.v1'
 contenttype_v2 = 'application/vnd.spring-boot.actuator.v2'
