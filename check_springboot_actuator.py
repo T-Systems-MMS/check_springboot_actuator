@@ -32,8 +32,8 @@ helper.parser.add_option(
 
 helper.parse_arguments()
 
-health_endpoint = helper.options.url + '/health/'
-metrics_endpoint = helper.options.url + '/metrics/'
+health_endpoint = helper.options.url + '/health'
+metrics_endpoint = helper.options.url + '/metrics'
 
 contenttype_v1 = 'application/vnd.spring-boot.actuator.v1'
 contenttype_v2 = 'application/vnd.spring-boot.actuator.v2'
@@ -142,7 +142,7 @@ else:
     if version == 1:
         details = json_data
     if version == 2:
-        details = json_data['details']
+        details = json_data['status']
 
     for item in [
         'cassandra', 'diskSpace', 'dataSource', 'elasticsearch', 'jms', 'mail',
