@@ -100,7 +100,7 @@ def handle_version_2():
     http_status_counter = {}
     for key in metrics:
         key = key.strip()
-        json_data, _, err = request_data(metrics_endpoint + key, **get_args)
+        json_data, _, err = request_data(metrics_endpoint + "/" + key, **get_args)
 
         if err:
             helper.add_summary('error fetching metrics data: {}'.format(err))
