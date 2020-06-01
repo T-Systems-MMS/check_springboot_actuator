@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+#
+# Example usage:
+# ./check_springboot_actuator.py -U "http://localhost:14041/testservice/v1/actuator" -N --th "metric=testservice_files_in_failure_value,ok=0,warning=1..20,critical=20.." -m testservice.files.in.failure
 from __future__ import print_function
 
 import logging
@@ -23,7 +26,7 @@ helper.parser.add_option(
     dest='truststore')
 helper.parser.add_option(
     '-m', '--metrics',
-    help='comma separated list of metrics to display',
+    help='comma separated list of metrics to display, they can be combined with thresholds',
     dest='metrics')
 helper.parser.add_option(
     '-u', '--user-credentials',
@@ -160,5 +163,7 @@ else:
         handle_version_1()
     if version == 2:
         handle_version_2()
+
+helper.check_all_metrics()
 
 helper.exit()

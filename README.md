@@ -6,6 +6,13 @@ This is an Nagios/Icinga check plugin for
 [actuator framework](http://docs.spring.io/spring-boot/docs/current-SNAPSHOT/reference/htmlsingle/#production-ready).
 The check inspects the response from the health and metrics endpoints.
 
+Usage
+========
+Example:
+```
+./check_springboot_actuator.py -U "http://localhost:14041/testservice/v1/actuator" -N --th "metric=testservice_files_in_failure_value,ok=0,warning=1..20,critical=20.." -m testservice.files.in.failure
+```
+
 Features
 ========
 
