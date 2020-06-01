@@ -53,7 +53,7 @@ def request_data(url, **get_args):
     try:
         response = get(url, **get_args)
         # check response content type to determine which actuator api to be used
-        if response.ok:
+        if response.ok or response.status_code == 503:
             contenttype = response.headers['Content-Type']
             version = 1 if contenttype.startswith(contenttype_v1) else 2
             return response.json(), version, None
