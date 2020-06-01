@@ -10,7 +10,7 @@ Usage
 ========
 Example:
 ```
-./check_springboot_actuator.py -U "http://localhost:14041/testservice/v1/actuator" -N --th "metric=testservice_files_in_failure_value,ok=0,warning=1..20,critical=20.." -m testservice.files.in.failure
+./check_springboot_actuator.py -U "http://localhost:14041/testservice/v1/actuator" -N --th "metric=testservice.files.in.failure.value,ok=0..0,warning=10..20,critical=20..inf" -m testservice.files.in.failure 
 ```
 
 Features

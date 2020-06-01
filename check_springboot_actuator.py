@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 #
 # Example usage:
-# ./check_springboot_actuator.py -U "http://localhost:14041/testservice/v1/actuator" -N --th "metric=testservice_files_in_failure_value,ok=0,warning=1..20,critical=20.." -m testservice.files.in.failure
+# ./check_springboot_actuator.py -U "http://localhost:14041/testservice/v1/actuator" -N --th "metric=testservice.files.in.failure.value,ok=0..0,warning=10..20,critical=20..inf" -m testservice.files.in.failure
+
 from __future__ import print_function
 
 import logging
@@ -87,7 +88,7 @@ def handle_version_1():
                 http_status_counter[status] = (
                     http_status_counter.get(status, 0) + json_data[key])
             else:
-                helper.add_metric(label=key.replace('.', '_'), value=json_data[key])
+                helper.add_metric(label=key, value=json_data[key])
 
         for status in http_status_counter:
             helper.add_metric(
@@ -116,7 +117,7 @@ def handle_version_2():
                 http_status_counter[status] = (
                         http_status_counter.get(status, 0) + measurement['value'])
             else:
-                helper.add_metric(label="%s_%s" % (key.replace('.', '_'), measurement['statistic'].lower()), value=measurement['value'])
+                helper.add_metric(label="%s.%s" % (key, measurement['statistic'].lower()), value=measurement['value'])
 
 
     for status in http_status_counter:
