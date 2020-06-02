@@ -1,7 +1,10 @@
 #!/usr/bin/env python
 #
-# Example usage:
-# ./check_springboot_actuator.py -U "http://localhost:14041/testservice/v1/actuator" -N --th "metric=testservice.files.in.failure.value,ok=0..0,warning=10..20,critical=20..inf" -m testservice.files.in.failure
+# Example usage health:
+# ./check_springboot_actuator.py -U "http://localhost:14041/testservice/v1/actuator"
+#
+# Example usage metrics:
+# ./check_springboot_actuator.py -U "http://localhost:14041/testservice/v1/actuator" --th "metric=testservice.files.in.failure.value,ok=0..0,warning=1..20,critical=20..inf" -m testservice.files.in.failure
 
 from __future__ import print_function
 
@@ -89,10 +92,11 @@ def handle_version_1():
                     http_status_counter.get(status, 0) + json_data[key])
             else:
                 helper.add_metric(label=key, value=json_data[key])
+                helper.add_summary('{} is {}'.format(key, json_data[key]))
 
         for status in http_status_counter:
-            helper.add_metric(
-                label='http{}'.format(status), value=http_status_counter[status])
+            helper.add_metric(label='http{}'.format(status), value=http_status_counter[status])
+            helper.add_summary('{} is {}'.format(key, http_status_counter[status]))
 
 
 def handle_version_2():
@@ -118,11 +122,11 @@ def handle_version_2():
                         http_status_counter.get(status, 0) + measurement['value'])
             else:
                 helper.add_metric(label="%s.%s" % (key, measurement['statistic'].lower()), value=measurement['value'])
-
+                helper.add_summary('{} is {}'.format(key, measurement['value']))
 
     for status in http_status_counter:
-        helper.add_metric(
-            label='http{}'.format(status), value=http_status_counter[status])
+        helper.add_metric(label='http{}'.format(status), value=http_status_counter[status])
+        helper.add_summary('{} is {}'.format(key, measurement['value']))
 
 
 json_data, version, err = request_data(health_endpoint, **get_args)
@@ -134,36 +138,38 @@ if json_data is None:
         helper.status(critical)
         helper.add_summary('could not fetch health data: {}'.format(err))
 else:
-    status = json_data['status']
-    if status == 'UP':
-        helper.status(ok)
-    elif status in ('DOWN', 'OUT_OF_SERVICE'):
-        helper.status(critical)
+    # Only check health if there are no metrics specified in check
+    if helper.options.metrics is None:
+        status = json_data['status']
+        if status == 'UP':
+            helper.status(ok)
+        elif status in ('DOWN', 'OUT_OF_SERVICE'):
+            helper.status(critical)
+        else:
+            helper.status(unknown)
+        helper.add_summary('global status is {}'.format(status))
+
+        if version == 1:
+            details = json_data
+        if version == 2:
+            details = json_data['status']
+
+        for item in [
+            'cassandra', 'diskSpace', 'dataSource', 'elasticsearch', 'jms', 'mail',
+            'mongo', 'rabbit', 'redis', 'solr', 'db', 'vault'
+        ]:
+            if item in details:
+                item_status = details[item]['status']
+                helper.add_summary('{} status is {}'.format(item, item_status))
+                if helper.get_status() != critical and item_status == 'UNKNOWN':
+                    helper.status(unknown)
+                elif item_status in ('DOWN', 'OUT_OF_SERVICE'):
+                    helper.status(critical)
     else:
-        helper.status(unknown)
-    helper.add_summary('global status is {}'.format(status))
-
-    if version == 1:
-        details = json_data
-    if version == 2:
-        details = json_data['status']
-
-    for item in [
-        'cassandra', 'diskSpace', 'dataSource', 'elasticsearch', 'jms', 'mail',
-        'mongo', 'rabbit', 'redis', 'solr', 'db', 'vault'
-    ]:
-        if item in details:
-            item_status = details[item]['status']
-            helper.add_summary('{} status is {}'.format(item, item_status))
-            if helper.get_status() != critical and item_status == 'UNKNOWN':
-                helper.status(unknown)
-            elif item_status in ('DOWN', 'OUT_OF_SERVICE'):
-                helper.status(critical)
-
-    if version == 1:
-        handle_version_1()
-    if version == 2:
-        handle_version_2()
+        if version == 1:
+            handle_version_1()
+        if version == 2:
+            handle_version_2()
 
 helper.check_all_metrics()
 
