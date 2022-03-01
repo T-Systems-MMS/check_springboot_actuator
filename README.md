@@ -24,6 +24,14 @@ The check checks the status field from the health endpoint for
 - redis status
 - solr status
 - vault
+- livenessState status
+- readinessState status
+- ping status
+- couchbase status
+- hazelcast status
+- influxdb status
+- ldap status
+- neo4j status
 
 The check aggregates metrics for the counter.status data from the metrics
 endpoints.

@@ -37,6 +37,7 @@ metrics_endpoint = helper.options.url + '/metrics'
 
 contenttype_v1 = 'application/vnd.spring-boot.actuator.v1'
 contenttype_v2 = 'application/vnd.spring-boot.actuator.v2'
+contenttype_v3 = 'application/vnd.spring-boot.actuator.v3'
 
 get_args = {'verify': helper.options.verify}
 
@@ -53,9 +54,11 @@ def request_data(url, **get_args):
     try:
         response = get(url, **get_args)
         # check response content type to determine which actuator api to be used
-        if response.ok or response.status_code == 503:
+        if response.ok:
             contenttype = response.headers['Content-Type']
-            version = 1 if contenttype.startswith(contenttype_v1) else 2
+            version = 1 
+            if contenttype.startswith(contenttype_v2): version = 2
+            elif contenttype.startswith(contenttype_v3): version = 3
             return response.json(), version, None
         else:
             return None, None, Exception(response.status_code, url)
@@ -143,10 +146,13 @@ else:
         details = json_data
     if version == 2:
         details = json_data['status']
+    if version == 3:
+        details = json_data['components']
 
     for item in [
         'cassandra', 'diskSpace', 'dataSource', 'elasticsearch', 'jms', 'mail',
-        'mongo', 'rabbit', 'redis', 'solr', 'db', 'vault'
+        'mongo', 'rabbit', 'redis', 'solr', 'db', 'vault', 'livenessState',
+        'readinessState', 'ping', 'couchbase', 'hazelcast', 'influxdb', 'ldap', 'neo4j'
     ]:
         if item in details:
             item_status = details[item]['status']
