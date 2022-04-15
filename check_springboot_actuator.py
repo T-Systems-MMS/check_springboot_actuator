@@ -54,12 +54,15 @@ def request_data(url, **get_args):
     try:
         response = get(url, **get_args)
         # check response content type to determine which actuator api to be used
-        if response.ok:
+        if response.ok or response.status_code == 503:
             contenttype = response.headers['Content-Type']
-            version = 1 
-            if contenttype.startswith(contenttype_v2): version = 2
-            elif contenttype.startswith(contenttype_v3): version = 3
-            return response.json(), version, None
+            if contenttype.startswith('application/vnd.spring-boot'):
+                version = 1 
+                if contenttype.startswith(contenttype_v2): version = 2
+                elif contenttype.startswith(contenttype_v3): version = 3
+                return response.json(), version, None
+            else:
+                return None, None, Exception(response.status_code, url)
         else:
             return None, None, Exception(response.status_code, url)
     except ConnectionError as e:
@@ -142,12 +145,12 @@ else:
         helper.status(unknown)
     helper.add_summary('global status is {}'.format(status))
 
-    if version == 1:
-        details = json_data
+
+    details = json_data
     if version == 2:
         details = json_data['status']
-    if version == 3:
-        details = json_data['components']
+    if version == 3 and 'components' in json_data :
+        details = json_data['components'] 
 
     for item in [
         'cassandra', 'diskSpace', 'dataSource', 'elasticsearch', 'jms', 'mail',
