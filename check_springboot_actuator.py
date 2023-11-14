@@ -98,7 +98,7 @@ def handle_version_1():
 
 
 def handle_version_2():
-    """handles metrics from spring boot 2.x application"""
+    """handles metrics from spring boot 2.x and 3.x application"""
     metrics = []
     if helper.options.metrics:
         metrics = helper.options.metrics.split(',')
@@ -167,7 +167,7 @@ else:
 
     if version == 1:
         handle_version_1()
-    if version == 2:
+    if version == 2 or version == 3:
         handle_version_2()
 
 helper.exit()
