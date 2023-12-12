@@ -5,7 +5,7 @@ import logging
 
 from pynag.Plugins import PluginHelper, ok, critical, unknown
 from requests import get
-from requests.exceptions import ConnectionError
+from requests.exceptions import ConnectionError, Timeout
 
 helper = PluginHelper()
 
@@ -29,6 +29,10 @@ helper.parser.add_option(
     '-u', '--user-credentials',
     help='user credentials in the format username:password',
     dest='credentials')
+helper.parser.add_option(
+    '-T', '--time-out',
+    help='timeout in seconds to wait for response from actuator endpoint',
+    dest='timeout', type="int", default=60)
 
 helper.parse_arguments()
 
@@ -39,7 +43,7 @@ contenttype_v1 = 'application/vnd.spring-boot.actuator.v1'
 contenttype_v2 = 'application/vnd.spring-boot.actuator.v2'
 contenttype_v3 = 'application/vnd.spring-boot.actuator.v3'
 
-get_args = {'verify': helper.options.verify}
+get_args = {'verify': helper.options.verify, 'timeout': helper.options.timeout}
 
 if helper.options.truststore:
     get_args['verify'] = helper.options.truststore
@@ -68,6 +72,9 @@ def request_data(url, **get_args):
     except ConnectionError as e:
         helper.debug('error fetching data from {}'.format(url))
         return None, None, e
+    except Timeout as t:
+        helper.debug('timeout fetching data from {}'.format(url))
+        return None, None, t
     finally:
         logging.captureWarnings(False)
 
