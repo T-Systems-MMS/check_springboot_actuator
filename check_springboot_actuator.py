@@ -30,7 +30,7 @@ helper.parser.add_option(
     help='user credentials in the format username:password',
     dest='credentials')
 helper.parser.add_option(
-    '-T', '--timeout',
+    '-T', '--time-out',
     help='timeout in seconds to wait for response from actuator endpoint',
     dest='timeout', type="int", default=60)
 
