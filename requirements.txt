@@ -10,4 +10,4 @@ idna==3.8                # via requests
 pynag==1.1.2              # via -r requirements.in
 requests==2.32.3          # via -r requirements.in
 six==1.16.0               # via pynag
-urllib3==2.2.2           # via requests
+urllib3==2.2.3           # via requests
