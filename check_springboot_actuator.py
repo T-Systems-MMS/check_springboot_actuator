@@ -143,7 +143,7 @@ if json_data is None:
         helper.status(critical)
         helper.add_summary('could not fetch health data: {}'.format(err))
 else:
-    status = json_data['status']
+    status = json_data['status']['code']
     if status == 'UP':
         helper.status(ok)
     elif status in ('DOWN', 'OUT_OF_SERVICE'):
